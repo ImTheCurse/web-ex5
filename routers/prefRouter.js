@@ -5,7 +5,7 @@ const prefRouter = new Router();
 
 
 prefRouter.post('/signup', prefController.dbSignUpHandler);
-
+prefRouter.get('/:username', prefController.dbGetUser);
 
 
 
