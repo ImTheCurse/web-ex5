@@ -65,6 +65,11 @@ exports.prefController = {
         const connection = await dbConnection.createConnection();
 
         try {
+            if (calculateDayOffset(req.body.start_date, req.body.end_date) > 7) {
+                res.status(400).send('length of date is more than a week, enter dates smaller than a week.');
+                return;
+
+            }
             const [user] = await connection.query('select * from tbl_59_preferences where access_code = ?', [req.body.access_code]);
             await connection.execute('insert into tbl_59_preferences values(?,?,?,?,?)',
                 [req.body.access_code, req.body.start_date, req.body.end_date, req.body.destination, req.body.vaction_type]);
@@ -73,7 +78,7 @@ exports.prefController = {
 
         } catch (err) {
             console.log(err);
-            res.status(404).send('Access_code not found, or date format is wrong, try YYYY-MM-DD');
+            res.status(404).send('Access_code not found, or date format is wrong, try YYYY-MM-DD, or prefernce already submitted.');
         }
     },
 
@@ -95,6 +100,11 @@ exports.prefController = {
         const vaction_type = req.body.vaction_type;
         const access_code = req.body.access_code;
 
+        if (calculateDayOffset(start_date, end_date) > 7) {
+            res.status(400).send('length of date is more than a week, enter dates smaller than a week.');
+            return;
+        }
+
         try {
             conn.execute(`update tbl_59_preferences set start_date = ?, end_date = ?, destination = ?, vaction_type = ? where access_code = ? `,
                 [start_date, end_date, destination, vaction_type, access_code]);
@@ -107,4 +117,12 @@ exports.prefController = {
 
 }
 
+function calculateDayOffset(first_date, second_date) {
+    const oneDay = 24 * 60 * 60 * 1000; // hours*minutes*seconds*milliseconds
+    const first = new Date(first_date);
+    const second = new Date(second_date);
 
+    const diffDays = Math.round(Math.abs((first - second) / oneDay));
+    return diffDays;
+
+}
