@@ -81,15 +81,28 @@ exports.prefController = {
         const { dbConnection } = require('../db_connection');
         const connection = await dbConnection.createConnection();
 
-        const [users] = await connection.query('select * from tbl_59_preferences');
+        const [users] = await connection.query('select start_date,end_date,destination,vaction_type from tbl_59_preferences;');
         res.status(200).send(users);
 
+    },
+    async dbModifyPref(req, res) {
+        const { dbConnection } = require('../db_connection');
+        const conn = await dbConnection.createConnection();
+
+        const start_date = req.body.start_date;
+        const end_date = req.body.end_date;
+        const destination = req.body.destination;
+        const vaction_type = req.body.vaction_type;
+        const access_code = req.body.access_code;
+
+        try {
+            conn.execute(`update tbl_59_preferences set start_date = ?, end_date = ?, destination = ?, vaction_type = ? where access_code = ? `,
+                [start_date, end_date, destination, vaction_type, access_code]);
+            res.status(200).send('Update preferences successfuly.');
+        } catch (err) {
+            res.status(404).send(`access_code: ${access_code} not found or invalid arguments to parameters. Error: ${err}`);
+        }
     }
-
-
-
-
-
 
 
 }
