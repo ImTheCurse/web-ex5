@@ -1,7 +1,6 @@
 const { v4 } = require('uuid');
 const uuid = v4;
 
-//all of these are potential for sql injection, but we learend it in class so I digress. we could use prepered statments to avoid that
 exports.prefController = {
 
     async listPref(req, res) {
@@ -24,7 +23,15 @@ exports.prefController = {
         const { dbConnection } = require('../db_connection');
         const connection = await dbConnection.createConnection();
         const access_code = uuid();
-        connection.execute(`insert into tbl_59_users(access_code,user_name,user_password) values('${access_code}','${req.body.username}','${req.body.password}')`);
+        try {
+
+            await connection.execute('insert into tbl_59_users(access_code,user_name,user_password) values(?,?,?)',
+                [access_code, req.body.username, req.body.password]);
+        } catch (err) {
+            res.status(400).send(err);
+            connection.end();
+            return;
+        }
 
         connection.end();
         res.status(200).send(`Successfuly inserted username and password, your access code is: ${access_code} `);
