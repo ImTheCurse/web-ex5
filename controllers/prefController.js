@@ -122,6 +122,11 @@ exports.prefController = {
         const conn = await dbConnection.createConnection();
 
         try {
+            const [allPref] = await conn.query('select count(*) as c from tbl_59_preferences');
+            if (allPref[0].c < 5) {
+                res.status(200).send('please wait for all preferences.');
+                return;
+            }
             const [prefs] = await conn.query('select destination,count(*) as num_of_votes from tbl_59_preferences group by destination order by num_of_votes desc limit 1');
 
             const [start_date] = await conn.query('select max(start_date) as s_date from tbl_59_preferences');
