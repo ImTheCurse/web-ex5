@@ -4,6 +4,14 @@ const uuid = v4;
 //all of these are potential for sql injection, but we learend it in class so I digress. we could use prepered statments to avoid that
 exports.prefController = {
 
+    async listPref(req, res) {
+
+        const json = require('../data/destinations.json');
+        const destinations = json.destinations;
+        res.status(200).send(destinations);
+
+    },
+
     //to sign up, use the key value of : "username": ..., "password":...
     async dbSignUpHandler(req, res) {
 

@@ -1,0 +1,22 @@
+{
+  "title": "destinations",
+  "destinations":[
+      "Greece",
+      "Panama",
+      "Spain",
+      "Portugal",
+      "Cyprus",
+      "Belgium",
+      "France",
+      "Germany",
+      "United States",
+      "United Kingdom"
+  ],
+  "vaction_types":[
+    "Relax",
+    "Sea",
+    "Parks",
+    "Family",
+    "Shopping"
+  ]
+}
