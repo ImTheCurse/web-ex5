@@ -1,7 +1,7 @@
 const { v4 } = require('uuid');
 const uuid = v4;
 
-//all of these are potential for sql injection, but we learend it in class so I digress.
+//all of these are potential for sql injection, but we learend it in class so I digress. we could use prepered statments to avoid that
 exports.prefController = {
 
     //to sign up, use the key value of : "username": ..., "password":...
@@ -32,21 +32,36 @@ exports.prefController = {
         }
 
     },
-    async dbCheckLoginInfo(req, res) {
+    async dbCheckLoginInfo(username, password) {
         const { dbConnection } = require('../db_connection');
         const connection = await dbConnection.createConnection();
-        const req_username = req.body.username;
-        const req_password = req.body.password;
 
         try {
             const [user] = await connection.query('select * from tbl_59_users where user_name = ? and user_password = ?',
-                [req_username, req_password]);
+                [username, password]);
             res.status(200).send(`Successful connection, your access_code:${user[0].access_code}`);
             console.log(user);
         } catch (err) {
             console.log(err);
             res.status(404).send('User not found.');
         }
+    },
+    async dbAddPreference(req, res) {
+        const { dbConnection } = require('../db_connection');
+        const connection = await dbConnection.createConnection();
+
+        try {
+            const [user] = await connection.query('select * from tbl_59_preferences where access_code = ?', [req.body.access_code]);
+            await connection.execute('insert into tbl_59_preferences values(?,?,?,?,?)',
+                [req.body.access_code, req.body.start_date, req.body.end_date, req.body.destination, req.body.vaction_type]);
+
+            res.status(200).send('Successfuly added prefernces.');
+
+        } catch (err) {
+            console.log(err);
+            res.status(404).send('Access_code not found, or date format is wrong, try YYYY-MM-DD');
+        }
+
 
     }
 

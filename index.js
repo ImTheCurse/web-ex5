@@ -16,7 +16,7 @@ app.use((req, res, next) => {
     next();
 });
 
-app.use('/api/users', prefRouter);
+app.use('/api', prefRouter);
 
 app.listen(port);
 
