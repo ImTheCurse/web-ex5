@@ -31,6 +31,23 @@ exports.prefController = {
             return null;
         }
 
+    },
+    async dbCheckLoginInfo(req, res) {
+        const { dbConnection } = require('../db_connection');
+        const connection = await dbConnection.createConnection();
+        const req_username = req.body.username;
+        const req_password = req.body.password;
+
+        try {
+            const [user] = await connection.query('select * from tbl_59_users where user_name = ? and user_password = ?',
+                [req_username, req_password]);
+            res.status(200).send(`Successful connection, your access_code:${user[0].access_code}`);
+            console.log(user);
+        } catch (err) {
+            console.log(err);
+            res.status(404).send('User not found.');
+        }
+
     }
 
 
