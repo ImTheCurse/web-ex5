@@ -33,36 +33,28 @@ exports.prefController = {
     async dbGetUser(req, res) {
         const { dbConnection } = require('../db_connection');
         const connection = await dbConnection.createConnection();
-        const username = await req.params.username;
+        const username = await req.body.username;
+        const password = await req.body.password;
 
         try {
-            const user_id = await connection.query(`select id from tbl_59_users where user_name like '${username}'`);
-            console.log(`Found user #${user_id[0][0].id}.`);
-            res.status(200).send('Found User.');
-            return user_id;
+            const user = await connection.query(`select * from tbl_59_users where user_name like ? and user_password like ?`,
+                [username, password]);
+            res.status(200).send(`Found User. Access_code:${user[0][0].access_code}`);
+            return user[0][0].access_code;
         } catch (err) {
             res.status(404).send('User not found.');
             return null;
         }
 
     },
-    async dbCheckLoginInfo(username, password) {
-        const { dbConnection } = require('../db_connection');
-        const connection = await dbConnection.createConnection();
-
-        try {
-            const [user] = await connection.query('select * from tbl_59_users where user_name = ? and user_password = ?',
-                [username, password]);
-            res.status(200).send(`Successful connection, your access_code:${user[0].access_code}`);
-            console.log(user);
-        } catch (err) {
-            console.log(err);
-            res.status(404).send('User not found.');
-        }
-    },
     async dbAddPreference(req, res) {
         const { dbConnection } = require('../db_connection');
         const connection = await dbConnection.createConnection();
+
+        if (!checkDest(req.body.destination) || !checkActivity(req.body.vaction_type)) {
+            res.status(400).send(`Destination / activity not on the agreed list.`);
+            return;
+        }
 
         try {
             if (calculateDayOffset(req.body.start_date, req.body.end_date) > 7) {
@@ -105,6 +97,11 @@ exports.prefController = {
             return;
         }
 
+        if (!checkDest(destination) || !checkActivity(vaction_type)) {
+            res.status(400).send(`Destination / activity not on the agreed list.`);
+            return;
+        }
+
         try {
             conn.execute(`update tbl_59_preferences set start_date = ?, end_date = ?, destination = ?, vaction_type = ? where access_code = ? `,
                 [start_date, end_date, destination, vaction_type, access_code]);
@@ -125,4 +122,26 @@ function calculateDayOffset(first_date, second_date) {
     const diffDays = Math.round(Math.abs((first - second) / oneDay));
     return diffDays;
 
+}
+
+function checkDest(dest) {
+    const json = require('../data/destinations.json');
+    const destinations = json.destinations;
+    for (let i = 0; i < destinations.length; i++) {
+        if (destinations[i] == dest) {
+            return true;
+        }
+    }
+    return false;
+}
+
+function checkActivity(act) {
+    const json = require('../data/destinations.json');
+    const activities = json.vaction_types;
+    for (let i = 0; i < activities.length; i++) {
+        if (activities[i] == act) {
+            return true;
+        }
+    }
+    return false;
 }
