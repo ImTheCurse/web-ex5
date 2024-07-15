@@ -116,6 +116,22 @@ exports.prefController = {
         } catch (err) {
             res.status(404).send(`access_code: ${access_code} not found or invalid arguments to parameters. Error: ${err}`);
         }
+    },
+    async findPrefDest(req, res) {
+        const { dbConnection } = require('../db_connection');
+        const conn = await dbConnection.createConnection();
+
+        try {
+            const [prefs] = await conn.query('select destination,count(*) as num_of_votes from tbl_59_preferences group by destination order by num_of_votes desc limit 1');
+
+            const [start_date] = await conn.query('select max(start_date) as s_date from tbl_59_preferences');
+            const [end_date] = await conn.query('select min(end_date) as e_date from tbl_59_preferences');
+            res.status(200).send(
+                `Destination: ${prefs[0].destination}, start date: ${start_date[0].s_date}, end date: ${end_date[0].e_date}`);
+        } catch (err) {
+            res.status(500).send(err);
+            return;
+        }
     }
 
 

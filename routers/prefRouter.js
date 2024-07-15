@@ -11,6 +11,6 @@ prefRouter.get('/vactions/destionations', prefController.listPref);
 prefRouter.get('/vactions/activity', prefController.listActivity);
 prefRouter.get('/preference/all', prefController.dbGetAllPrefernces);
 prefRouter.post('/preference/modify', prefController.dbModifyPref);
-
+prefRouter.get('/preference/best', prefController.findPrefDest);
 
 module.exports = { prefRouter };
