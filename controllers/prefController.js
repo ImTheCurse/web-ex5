@@ -12,6 +12,12 @@ exports.prefController = {
 
     },
 
+    async listActivity(req, res) {
+        const json = require('../data/destinations.json');
+        const activities = json.vaction_types;
+        res.status(200).send(activities);
+    },
+
     //to sign up, use the key value of : "username": ..., "password":...
     async dbSignUpHandler(req, res) {
 
@@ -69,7 +75,14 @@ exports.prefController = {
             console.log(err);
             res.status(404).send('Access_code not found, or date format is wrong, try YYYY-MM-DD');
         }
+    },
 
+    async dbGetAllPrefernces(req, res) {
+        const { dbConnection } = require('../db_connection');
+        const connection = await dbConnection.createConnection();
+
+        const [users] = await connection.query('select * from tbl_59_preferences');
+        res.status(200).send(users);
 
     }
 
